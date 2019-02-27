@@ -7,7 +7,7 @@ A simple python script to generate timecode and spit it out over UDP in a pseudo
 Help
 
 ```bash
-> python3 generateTimecode.py -h
+python3 generateTimecode.py -h
 
 usage: generateTimecode.py [-h] [-f STARTFRAME] [-r {24,25,30}] [-e ENDFRAME]
                            [-R] [-a IPADDRESS] [-p PORT]
@@ -35,7 +35,7 @@ IP:
 Just start rolling code from 0 at 30 frames
 
 ```bash
-> python3 generateTimecode.py
+python3 generateTimecode.py
 # 00 00 00 00
 # 0
 # ---
@@ -44,7 +44,7 @@ Just start rolling code from 0 at 30 frames
 Start at a specific frame
 
 ```bash
-> python3 generateTimecode.py -f 400
+python3 generateTimecode.py -f 400
 # 00 00 13 10
 # 400
 # ---
