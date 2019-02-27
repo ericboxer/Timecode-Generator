@@ -14,7 +14,7 @@ import math
 import time
 
 
-# MARK: Handle the arguments
+# Handle the arguments
 parser = argparse.ArgumentParser()
 timecodeArgs = parser.add_argument_group("Timecode")
 ipArgs = parser.add_argument_group("IP")
@@ -67,6 +67,8 @@ ipArgs.add_argument(
 )
 args = parser.parse_args()
 
+
+# TODO: Might want to make this a class so its easier to work with
 
 # Now that we've got our arguments sorted lets do something with them
 frame = args.startFrame
@@ -125,13 +127,13 @@ def frameToTime(frames, framerate, showCode=False):
         fr = 0b00
     elif framerate == 25:
         fr = 0b01
+    # TODO: Make dropframe math more gooder
     # 29.97 Needs a bit more work to actually be correct
     # elif framerate == 29.97:
     #     fr = 0b10
     #     frames = round(frames * 1.001)  # Adjust framerate
     else:
         fr = 0b11
-
     hours = math.floor(frames / hour)
     minFrames = frames - (hour * hours)
     minutes = math.floor(minFrames / minute)
@@ -139,6 +141,7 @@ def frameToTime(frames, framerate, showCode=False):
     seconds = math.floor(secFrames / second)
     frameFrames = secFrames - (second * seconds)
     if showCode == True:
+        # TODO: F-string this for clarity
         print(
             str(hours).zfill(2),
             str(minutes).zfill(2),

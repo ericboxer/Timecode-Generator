@@ -2,9 +2,18 @@
 
 A simple python script to generate timecode and spit it out over UDP in a pseudo MTC format
 
+## Installation
+
+Nothing fancy here. You should probably have [Python 3][1] (3.7+) installed.  
+I recommend using a virtual environment. If you want to feel fancy use [Pipenv][2]:
+
+```bash
+pipenv install
+```
+
 ## Usage
 
-Help
+Getting help
 
 ```bash
 python3 generateTimecode.py -h
@@ -49,3 +58,6 @@ python3 generateTimecode.py -f 400
 # 400
 # ---
 ```
+
+[1]: https://www.python.org/downloads/
+[2]: https://pipenv.readthedocs.io/en/latest/
