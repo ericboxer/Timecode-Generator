@@ -1,4 +1,4 @@
 {
-    "python.pythonPath": "/Users/eric/.local/share/virtualenvs/Python_Timecode_Generator-sHGYaQXd/bin/python",
+    "python.pythonPath": "/Users/ericboxer/.local/share/virtualenvs/Timecode-Generator-5yfEdifp/bin/python",
     "python.formatting.provider": "black"
 }
