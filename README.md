@@ -11,6 +11,14 @@ I recommend using a virtual environment. If you want to feel fancy use [Pipenv][
 pipenv install
 ```
 
+## A note about MTC and quarter frames
+
+While this format is strangely familiar to [MTC][3] it only uses the full frame format. I can't take credit though. This was meant to work with a [KISSBOX TC2TR][4].
+
+Essentially you can send the output directly to the unit and it will generate an LTC timecode output.
+
+Because of the speed and bandwidth at which even a slow network works the need for quarter frames is not needed.
+
 ## Usage
 
 Getting help
@@ -61,3 +69,5 @@ python3 generateTimecode.py -f 400
 
 [1]: https://www.python.org/downloads/
 [2]: https://pipenv.readthedocs.io/en/latest/
+[3]: https://bxhd.me/2UtcYr9
+[4]: https://bxhd.me/2UtFRU3

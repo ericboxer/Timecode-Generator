@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 
 """
-Sends an MTC packet of timecode to a given address.
+Sends a full frame MTC packet to a given address.
 MTC calculated based on https://en.wikipedia.org/wiki/MIDI_timecode
-Qurater-frames are not handled.
+Qurater-frames are not handled, nor are they needed. Full frames only.
 """
 
-__version__ = "0.2.1"
+__version__ = "0.2.3"
 
 
 import argparse
@@ -32,7 +32,7 @@ timecodeArgs.add_argument(
     type=int,
     help="what framerate to use",
     action="store",
-    choices=[24, 25, 30],
+    choices=[24, 25, 29, 30],
     default=30,
 )
 
@@ -78,12 +78,14 @@ frameRate = args.framerate
 # TODO: Set a check to make sure this falls within an actual usable range...
 endFrame = args.endFrame if args.endFrame else (frameRate * 60 * 60 * 24)
 
-mtcPacket = [
+# This is totally based on an MTC full frame message. No hiding it.
+tcPacket = [
     0xF0,  # Message Start
     0x7F,  # Universal Message
     0x7F,  # Global Broadcast
     0x01,  # Timecode Message
-    0b11,  # Framerate (though the article says this indicates a full-frame message...)
+    # 0b11,  # Framerate (though the article says this indicates a full-frame message...)
+    0x01,  # The article was right. Framerate is baked into the binary data of the hours byte. You sneaky...
     0x00,  # Hours
     0x00,  # Minutes
     0x00,  # Seconds
@@ -114,26 +116,31 @@ def frameToTime(frames, framerate, showCode=False):
         showCode {bool} -- Prints the data to the screen. (default: {False})
     
     Returns:
-        list -- THe final packet data
+        list -- The final packet data
     """
 
-    packet = mtcPacket
+    packet = tcPacket
     second = round(frameRate)
     minute = second * 60
     hour = minute * 60
 
-    # Set the framerate byte. Defaults to 30
+    # TODO: Why does checking if framerate == 29 not work? I probably made a booboo somewhere...
     if framerate == 24:
-        fr = 0b00
+        fr = 0b00000000
     elif framerate == 25:
-        fr = 0b01
-    # TODO: Make dropframe math more gooder
-    # 29.97 Needs a bit more work to actually be correct
-    # elif framerate == 29.97:
-    #     fr = 0b10
-    #     frames = round(frames * 1.001)  # Adjust framerate
+        fr = 0b01000000
+    # elif framerate == 29:
+    #     fr = 0b10000000
+    # else:
+    #     fr = 0b11000000
+    elif framerate == 30:
+        fr = 0b11000000
     else:
-        fr = 0b11
+        fr = 0b10000000
+
+    # fr = fr << 6  # shift it to far side of the hour
+    print(bin(fr))
+
     hours = math.floor(frames / hour)
     minFrames = frames - (hour * hours)
     minutes = math.floor(minFrames / minute)
@@ -150,7 +157,11 @@ def frameToTime(frames, framerate, showCode=False):
         )
         print(frames)
 
-    packet[4] = fr
+    # now that we've shown pretty things, lets add the framerate to hour
+    hours = hours | fr
+
+    print(bin(hours))
+
     packet[5] = hours
     packet[6] = minutes
     packet[7] = seconds
@@ -166,9 +177,10 @@ if __name__ == "__main__":
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     while True:
         # s.sendto(bytearray(frameToTime(frame, frameRate, True)), ("10.0.1.201", 5007))
-        s.sendto(
-            bytearray(frameToTime(frame, frameRate, True)), (args.ipAddress, args.port)
-        )
+        currentFrame = frameToTime(frame, frameRate, True)
+        print(bytearray(currentFrame))
+        s.sendto(bytearray(currentFrame), (args.ipAddress, args.port))
+
         print("---")
 
         if frame == endFrame:
@@ -183,6 +195,9 @@ if __name__ == "__main__":
         # time.sleep() is too slow. Genereate speed based off of the frameRate
         while True:
             newNow = time.time()
+
+            if frameRate == 29:
+                frameRate = 29.97
             if newNow >= now + 1 / frameRate:
                 break
         incrementFrame()
