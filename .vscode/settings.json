@@ -1,8 +1,4 @@
 {
-<<<<<<< HEAD
-    "python.pythonPath": "/Users/boxee001/.local/share/virtualenvs/Timecode-Generator-2iUs9USl/bin/python",
-=======
-    "python.pythonPath": "/Users/ericboxer/.local/share/virtualenvs/Timecode-Generator-5yfEdifp/bin/python",
->>>>>>> master
-    "python.formatting.provider": "black"
+  "python.pythonPath": "/usr/local/bin/python3",
+  "python.formatting.provider": "black"
 }

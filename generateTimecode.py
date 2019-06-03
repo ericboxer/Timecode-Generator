@@ -6,7 +6,7 @@ MTC calculated based on https://en.wikipedia.org/wiki/MIDI_timecode
 Qurater-frames are not handled, nor are they needed. Full frames only.
 """
 
-__version__ = "0.2.3"
+__version__ = "0.2.5"
 
 
 import argparse
@@ -63,7 +63,16 @@ ipArgs.add_argument(
 )
 
 ipArgs.add_argument(
-    "-p", "--port", help="The port to send to.", action="store", default=5005
+    "-b",
+    "--bindAddress",
+    help="The Source IP Address. Defaults to localhost",
+    action="store",
+    default="",
+)
+
+
+ipArgs.add_argument(
+    "-p", "--port", help="The port to send to.", action="store", type=int, default=5005
 )
 args = parser.parse_args()
 
@@ -84,7 +93,6 @@ tcPacket = [
     0x7F,  # Universal Message
     0x7F,  # Global Broadcast
     0x01,  # Timecode Message
-    # 0b11,  # Framerate (though the article says this indicates a full-frame message...)
     0x01,  # The article was right. Framerate is baked into the binary data of the hours byte. You sneaky...
     0x00,  # Hours
     0x00,  # Minutes
@@ -120,26 +128,27 @@ def frameToTime(frames, framerate, showCode=False):
     """
 
     packet = tcPacket
-    second = round(frameRate)
+    second = round(framerate) if framerate != 29.97 else 29
+    # second = frameRate
     minute = second * 60
     hour = minute * 60
 
+    # fr = 0 # Just a placeholder for the framerate
     # TODO: Why does checking if framerate == 29 not work? I probably made a booboo somewhere...
     if framerate == 24:
         fr = 0b00000000
     elif framerate == 25:
-        fr = 0b01000000
+        fr = 0b00100000
     # elif framerate == 29:
     #     fr = 0b10000000
     # else:
     #     fr = 0b11000000
     elif framerate == 30:
-        fr = 0b11000000
+        fr = 0b01100000
     else:
-        fr = 0b10000000
+        fr = 0b01000000
 
     # fr = fr << 6  # shift it to far side of the hour
-    print(bin(fr))
 
     hours = math.floor(frames / hour)
     minFrames = frames - (hour * hours)
@@ -158,9 +167,8 @@ def frameToTime(frames, framerate, showCode=False):
         print(frames)
 
     # now that we've shown pretty things, lets add the framerate to hour
-    hours = hours | fr
-
-    print(bin(hours))
+    # print(fr)
+    hours = hours + fr
 
     packet[5] = hours
     packet[6] = minutes
@@ -174,12 +182,21 @@ if __name__ == "__main__":
     import socket
 
     # Send the data over UDP
+
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    s.bind((args.bindAddress, 0))
     while True:
+        # print(s)
         # s.sendto(bytearray(frameToTime(frame, frameRate, True)), ("10.0.1.201", 5007))
         currentFrame = frameToTime(frame, frameRate, True)
-        print(bytearray(currentFrame))
-        s.sendto(bytearray(currentFrame), (args.ipAddress, args.port))
+        print(args.ipAddress, args.port)
+
+        # print(bytearray(currentFrame))
+        print(currentFrame)
+        try:
+            s.sendto(bytearray(currentFrame), (args.ipAddress, args.port))
+        except Exception as e:
+            print(e)
 
         print("---")
 
@@ -201,4 +218,3 @@ if __name__ == "__main__":
             if newNow >= now + 1 / frameRate:
                 break
         incrementFrame()
-
