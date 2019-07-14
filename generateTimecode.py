@@ -128,7 +128,7 @@ def frameToTime(frames, framerate, showCode=False):
     """
 
     packet = tcPacket
-    second = round(framerate) if framerate != 29.97 else 29
+    second = framerate if framerate != 29.97 else (30 * 1.001)
     # second = frameRate
     minute = second * 60
     hour = minute * 60
@@ -155,7 +155,7 @@ def frameToTime(frames, framerate, showCode=False):
     minutes = math.floor(minFrames / minute)
     secFrames = minFrames - (minute * minutes)
     seconds = math.floor(secFrames / second)
-    frameFrames = secFrames - (second * seconds)
+    frameFrames = math.floor(secFrames - (second * seconds))
     if showCode == True:
         # TODO: F-string this for clarity
         print(
